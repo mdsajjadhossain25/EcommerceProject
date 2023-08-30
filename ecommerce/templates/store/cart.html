@@ -3,6 +3,16 @@
   <div class="container">
     <!-- ============================ COMPONENT 1 ================================= -->
 
+    {% if not cart_items %}
+    <!-- message  -->
+    <div class="alert alert-danger text-center" role="alert">
+      Your shopping cart is empty!
+    </div>
+    <br />
+    <div class="text-center">
+      <a href="{% url 'store' %}" class="btn btn-primary"> Continue Shopping</a>
+    </div>
+    {% else %}
     <div class="row">
       <aside class="col-lg-9">
         <div class="card">
@@ -21,13 +31,19 @@
                 <td>
                   <figure class="itemside align-items-center">
                     <div class="aside">
-                      <img
-                        src="{{cart_item.product.image.url}}"
-                        class="img-sm"
-                      />
+                      <a
+                        href="{{ cart_item.product.get_url }}"
+                        class="title text-dark"
+                      >
+                        <img
+                          src="{{cart_item.product.image.url}}"
+                          class="img-sm"
+                      /></a>
                     </div>
                     <figcaption class="info">
-                      <a href="#" class="title text-dark"
+                      <a
+                        href="{{ cart_item.product.get_url }}"
+                        class="title text-dark"
                         >{{cart_item.product.product_name}}</a
                       >
                       <p class="text-muted small">
@@ -116,12 +132,15 @@
             </dl>
             <hr />
             <p class="text-center mb-3">
-              <img src="./images/misc/payments.png" height="26" />
+              <img
+                src="{% static './images/misc/payments.png' %}"
+                height="26"
+              />
             </p>
             <a href="./place-order.html" class="btn btn-primary btn-block">
               Checkout
             </a>
-            <a href="./store.html" class="btn btn-light btn-block"
+            <a href="{% url 'store' %}" class="btn btn-light btn-block"
               >Continue Shopping</a
             >
           </div>
@@ -131,6 +150,8 @@
       </aside>
       <!-- col.// -->
     </div>
+
+    {% endif %}
     <!-- row.// -->
     <!-- ============================ COMPONENT 1 END .// ================================= -->
   </div>

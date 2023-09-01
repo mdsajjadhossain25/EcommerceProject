@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render, HttpResponse
+from store.models import Variation
 from store.models import Product
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
@@ -14,11 +15,20 @@ def _cart_id(request):  # private method
 
 
 def add_cart(request, product_id):
-    color = request.GET['color']
-    size = request.GET['size']
-    return HttpResponse(color + ' ' + size) 
-    
     product = Product.objects.get(id=product_id)
+    product_variation = []
+    if request.method =='POST':
+        for item in request.POST:
+            key = item
+            value = request.POST[key]
+            
+            try:
+                variation = Variation.objects.get(product=product, variation_category__iexact = key, variation_value__iexact = value)
+                product_variation.append(variation)
+            except:
+                pass
+            
+            
     try:
         # get the cart using the cart_id present in the session
         cart = Cart.objects.get(cart_id=_cart_id(request))

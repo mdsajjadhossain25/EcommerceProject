@@ -1,7 +1,7 @@
 import datetime
 from django.shortcuts import render, redirect
 from carts.models import CartItem
-from orders.models import Order, Payment
+from orders.models import Order, OrderProduct, Payment
 from .forms import OrderForm
 import json
 
@@ -10,8 +10,8 @@ import json
 def payments(request):
     body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-    
-    # store all the details to payment model 
+
+    # Store transaction details inside Payment model
     payment = Payment(
         user = request.user,
         payment_id = body['transID'],
@@ -20,11 +20,23 @@ def payments(request):
         status = body['status'],
     )
     payment.save()
+
     order.payment = payment
     order.is_ordered = True
     order.save()
     
     # move the cart item to order product table
+    cart_items = CartItem.objects.filter(user=request.user)
+    for item in cart_items:
+        orderproduct = OrderProduct()
+        orderproduct.order_id = order.id
+        orderproduct.payment = payment
+        orderproduct.user_id = request.user.id
+        orderproduct.product_id = item.product_id
+        orderproduct.quantity = item.quantity
+        orderproduct.product_price = item.product.price
+        orderproduct.ordered = True
+        orderproduct.save()
     
     # reduce the quantity of sold products 
     

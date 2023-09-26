@@ -1,0 +1,15 @@
+{% autoescape off %}
+Hi {{user.first_name}},
+Your Order Has Been recieved.
+Order Number: {{order.order_number}}
+Total: ${{order.order_total}}
+{% if order.address_line_1 %}
+Shipping Address: {{order.address_line_1}}
+{% endif %}
+{% if order.city %}
+City: {{order.city}}
+{% endif %}
+{% if order.state %}
+State: {{order.state}}
+{% endif %}
+{% endautoescape %}

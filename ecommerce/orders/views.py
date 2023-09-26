@@ -1,9 +1,12 @@
-import datetime
 from django.shortcuts import render, redirect
 from carts.models import CartItem
+from store.models import Product
 from orders.models import Order, OrderProduct, Payment
 from .forms import OrderForm
-import json
+import json, datetime
+
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -37,13 +40,31 @@ def payments(request):
         orderproduct.product_price = item.product.price
         orderproduct.ordered = True
         orderproduct.save()
+        
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variation = cart_item.variations.all()
+        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+        orderproduct.variations.set(product_variation)
+        orderproduct.save()
     
     # reduce the quantity of sold products 
+        product = Product.objects.get(id=item.product_id)
+        product.stock -= item.quantity
+        product.save()
     
     
     # clear cart 
+    CartItem.objects.filter(user=request.user).delete()
     
     # send email to the customer about order confirmation
+    mail_subject = "Thank You For Your Order"
+    message = render_to_string('orders/order_recieved_email.html', {
+        'user': request.user,
+        'order': order,
+    })
+    to_email = request.user.email
+    send_email = EmailMessage(mail_subject, message, to=[to_email])
+    send_email.send()
     
     
     # send order number and transaction id to send data function
